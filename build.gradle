@@ -1,0 +1,69 @@
+plugins {
+    id 'java'
+}
+
+group = 'it.novaverse'
+version = '1.0.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'papermc-repo'
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+    maven {
+        name = 'enginehub-repo'
+        url = 'https://maven.enginehub.org/repo/'
+    }
+}
+
+dependencies {
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    // Paper
+    compileOnly 'io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT'
+
+    // WE Support
+    compileOnly 'com.sk89q.worldedit:worldedit-core:7.2.18'
+    compileOnly 'com.sk89q.worldedit:worldedit-bukkit:7.2.18'
+
+    // Java Libraries
+    compileOnly 'org.apache.httpcomponents.client5:httpclient5:5.3'
+
+    // Commands
+    compileOnly 'cloud.commandframework:cloud-paper:1.8.4'
+    compileOnly 'cloud.commandframework:cloud-annotations:1.8.4'
+    compileOnly 'me.lucko:commodore:2.2'
+    annotationProcessor 'cloud.commandframework:cloud-annotations:1.8.4'
+}
+
+processResources {
+    def props = [version: version, name: rootProject.name]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('paper-plugin.yml') {
+        expand props
+    }
+}
+
+def targetJavaVersion = 17
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release.set(targetJavaVersion)
+    }
+}
